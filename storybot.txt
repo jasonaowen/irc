@@ -1,0 +1,15 @@
+user: nick, nickserv account, attrib (email/screenname/realname/website/whatever)
+story: users, lines, state, type, title
+line: author (user), content
+state (enum): pending, active, over
+type (enum): public (in-channel), private (parallel, private messages), madlibs (parallel, private messages)
+
+flow:
+  create story
+  wait for people to join
+  start story
+  compose story
+  end story
+  ask for titles via PM
+  vote
+  publish

@@ -1,0 +1,18 @@
+irc:
+  server:
+    address: irc.example.com
+    port: 7000
+    ssl: Yes
+    username: foo
+    password: bar
+  nickname: Examplebot
+  nickservPassword: baz
+  channels:
+    - {name: '#example', key: }
+    - {name: '#example-test', key: 'botsonly'}
+  operator: Blort # nick of person who can issue restricted commands
+database:
+  type: sqlite
+  filename: example.db
+messages:
+  register: You need to register!
