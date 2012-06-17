@@ -1,8 +1,9 @@
+from twisted.internet import protocol, reactor, ssl
 from twisted.words.protocols import irc
-from twisted.internet import protocol
+import sys
 import yaml
 
-class Storybot(irc.IRCClient):
+class BotCore(irc.IRCClient):
   def _get_username(self):
     return self.factory.username
   def _get_password(self):
@@ -31,8 +32,8 @@ class Storybot(irc.IRCClient):
   def nickChanged(self, nick):
     print "Nickname changed to %s" % (nick,)
 
-class StorybotFactory(protocol.ClientFactory):
-  protocol = Storybot
+class BotCoreFactory(protocol.ClientFactory):
+  protocol = BotCore
 
   def __init__(self, username, password, operator, nickname, channels, messages):
     self.username = username
@@ -49,26 +50,24 @@ class StorybotFactory(protocol.ClientFactory):
   def clientConnectionFailed(self, connector, reason):
     print "Could not connect: %s" % (reason,)
 
-import sys
-from twisted.internet import reactor, ssl
-
 if __name__ == "__main__":
   configFile = open("config.yaml")
   config = yaml.load(configFile)
   configFile.close()
 
+  bcf = BotCoreFactory(config["irc"]["server"]["username"],
+                       config["irc"]["server"]["password"],
+                       config["irc"]["operator"],
+                       config["irc"]["nickname"],
+                       config["irc"]["channels"],
+                       config["messages"])
+
   if config["irc"]["server"]["ssl"]:
     reactor.connectSSL(config["irc"]["server"]["address"],
                        config["irc"]["server"]["port"],
-                       StorybotFactory(config["irc"]["server"]["username"],
-                                       config["irc"]["server"]["password"],
-                                       config["irc"]["operator"],
-                                       config["irc"]["nickname"],
-                                       config["irc"]["channels"],
-                                       config["messages"]),
-                       ssl.ClientContextFactory())
+                       bcf, ssl.ClientContextFactory())
   else: # not ssl
     reactor.connectTCP(config["irc"]["server"]["address"],
                        config["irc"]["server"]["port"],
-                       StorybotFactory(config["irc"]["nick"], config["irc"]["channels"]))
+                       bcf)
   reactor.run()
