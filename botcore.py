@@ -23,25 +23,51 @@ class BotCore(irc.IRCClient):
   def joined(self, channel):
     print "Joined %s." % (channel,)
 
-  def privmsg(self, user, channel, msg):
-    if channel == self.nickname:
-      print "PRIVMSG from %s: %s" % (user, msg,)
-    else:
-      print "%s: %s said %s" % (channel, user, msg,)
-
   def nickChanged(self, nick):
     print "Nickname changed to %s" % (nick,)
+
+  def noticed(self, user, channel, message):
+    print "Notice on channel %s by user %s: %s" (channel, user, message,)
+
+  def privmsg(self, user, channel, msg):
+    handled = False
+    if channel == self.nickname:
+      for handler in self.factory.messageHandlers:
+        if not handled:
+          handled = handler.privateMessage(self, user, msg)
+    else:
+      for handler in self.factory.messageHandlers:
+        if not handled:
+          handled = handler.channelMessage(self, channel, user, msg)
+
+  def irc_unknown(self, prefix, command, params):
+    handled = False
+    for handler in self.factory.messageHandlers:
+      if not handled:
+        handled = handler.unknownCommand(self, prefix, command, params)
 
 class BotCoreFactory(protocol.ClientFactory):
   protocol = BotCore
 
-  def __init__(self, username, password, operator, nickname, channels, messages):
+  def __init__(self, username, password, operator, nickname, channels, modules, messages):
     self.username = username
     self.password = password
     self.operator = operator
     self.nickname = nickname
     self.channels = channels
     self.messages = messages
+
+    self.messageHandlers = []
+    for module in modules:
+      m = __import__(module["module"])
+      c = m.__dict__[module["class"]]
+      if callable(c.privateMessage) and callable(c.channelMessage):
+        print "Adding class '%s' from module '%s' as message handler." % \
+          (module["class"], module["module"],)
+        self.messageHandlers.append(c())
+      else:
+        print "Not adding class '%s' from module '%s' as message handler." % \
+          (module["class"], module["module"],)
 
   def clientConnectionLost(self, connector, reason):
     print "Lost connection (%s), reconnecting." % (reason,)
@@ -60,6 +86,7 @@ if __name__ == "__main__":
                        config["irc"]["operator"],
                        config["irc"]["nickname"],
                        config["irc"]["channels"],
+                       config["modules"],
                        config["messages"])
 
   if config["irc"]["server"]["ssl"]:
