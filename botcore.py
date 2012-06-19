@@ -33,17 +33,17 @@ class BotCore(irc.IRCClient):
     handled = False
     if channel == self.nickname:
       for handler in self.factory.messageHandlers:
-        if not handled:
+        if not handled and "privateMessage" in dir(handler) and callable(handler.privateMessage):
           handled = handler.privateMessage(self, user, msg)
     else:
       for handler in self.factory.messageHandlers:
-        if not handled:
+        if not handled and "channelMessage" in dir(handler) and callable(handler.channelMessage):
           handled = handler.channelMessage(self, channel, user, msg)
 
   def irc_unknown(self, prefix, command, params):
     handled = False
     for handler in self.factory.messageHandlers:
-      if not handled:
+      if not handled and "unknownCommand" in dir(handler) and callable(handler.unknownCommand):
         handled = handler.unknownCommand(self, prefix, command, params)
 
 class BotCoreFactory(protocol.ClientFactory):
@@ -61,13 +61,9 @@ class BotCoreFactory(protocol.ClientFactory):
     for module in modules:
       m = __import__(module["module"])
       c = m.__dict__[module["class"]]
-      if callable(c.privateMessage) and callable(c.channelMessage):
-        print "Adding class '%s' from module '%s' as message handler." % \
-          (module["class"], module["module"],)
-        self.messageHandlers.append(c())
-      else:
-        print "Not adding class '%s' from module '%s' as message handler." % \
-          (module["class"], module["module"],)
+      print "Adding class '%s' from module '%s' as message handler." % \
+        (module["class"], module["module"],)
+      self.messageHandlers.append(c())
 
   def clientConnectionLost(self, connector, reason):
     print "Lost connection (%s), reconnecting." % (reason,)
