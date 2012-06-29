@@ -1,5 +1,6 @@
 from twisted.words.protocols import irc
 import random
+import datetime
 
 class Storybot:
   def __init__(self):
@@ -81,6 +82,22 @@ class Storybot:
       self.readyUsers.add(self.nextUser)
       self.lines.append((nick, line))
       if line.lower().find("the end") == 0:
+        finished = datetime.datetime.now().strftime("%Y-%m-%dt%H%M")
+        f = open("storybot/%s.txt" % finished, "w")
+        print >> f, "Story in %s, finished at %s" % (channel, finished,)
+        print >> f, ""
+        print >> f, "Authors:"
+        for author in self.readyUsers:
+          print >> f, "  %s" % self.attrib[author]
+        print >> f, ""
+        print >> f, "This story is published under the Creative Commons Attribution-ShareAlike 3.0 License."
+        print >> f, "You may copy it, edit it, or sell it, so long as you include the Authors section above."
+        print >> f, "More details at http://creativecommons.org/licenses/by-sa/3.0/"
+        print >> f, ""
+        for line in self.lines:
+          print >> f, line[1]
+        f.close()
+        client.say(channel, "Story published at http://owenja.dyndns.org/%s" % f.name)
         self.state = "idle"
         client.mode(channel, False, "m")
       else:
