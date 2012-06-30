@@ -15,7 +15,6 @@ flow:
   publish
 
 ideas:
-  ping (pm) on getting voice
   echo moderated comments to meta channel
   FFA story mode - all in have voice at once
     except for the last person to speak?

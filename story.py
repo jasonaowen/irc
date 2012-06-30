@@ -103,6 +103,7 @@ class Storybot:
         self.nextUser = nextUser
         self.readyUsers.remove(self.nextUser)
         client.mode(channel, True, "v", None, self.nextUser)
+        client.msg(self.nextUser, "It's your turn in %s!" % channel)
       return True
     return False
 
