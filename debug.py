@@ -8,3 +8,6 @@ class DebugHandler:
   def unknownCommand(self, client, prefix, command, params):
     print "%s %s %s" % (prefix, command, params,)
     return False
+  def notice(self, client, channel, user, message):
+    print "Notice on channel %s by user %s: %s" % (channel, user, message,)
+    return False

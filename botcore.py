@@ -26,25 +26,25 @@ class BotCore(irc.IRCClient):
   def nickChanged(self, nick):
     print "Nickname changed to %s" % (nick,)
 
-  def noticed(self, user, channel, message):
-    print "Notice on channel %s by user %s: %s" (channel, user, message,)
-
-  def privmsg(self, user, channel, msg):
-    handled = False
-    if channel == self.nickname:
-      for handler in self.factory.messageHandlers:
-        if not handled and "privateMessage" in dir(handler) and callable(handler.privateMessage):
-          handled = handler.privateMessage(self, user, msg)
-    else:
-      for handler in self.factory.messageHandlers:
-        if not handled and "channelMessage" in dir(handler) and callable(handler.channelMessage):
-          handled = handler.channelMessage(self, channel, user, msg)
-
-  def irc_unknown(self, prefix, command, params):
+  def handleEvent(self, methodName, *args):
     handled = False
     for handler in self.factory.messageHandlers:
-      if not handled and "unknownCommand" in dir(handler) and callable(handler.unknownCommand):
-        handled = handler.unknownCommand(self, prefix, command, params)
+      if not handled and methodName in dir(handler):
+        method = getattr(handler, methodName)
+        if callable(method):
+          handled = method(*args)
+
+  def noticed(self, user, channel, message):
+    self.handleEvent("notice", self, channel, user, message)
+
+  def privmsg(self, user, channel, msg):
+    if channel == self.nickname:
+      self.handleEvent("privateMessage", self, user, msg)
+    else:
+      self.handleEvent("channelMessage", self, channel, user, msg)
+
+  def irc_unknown(self, prefix, command, params):
+    self.handleEvent("unknownCommand", self, prefix, command, params)
 
 class BotCoreFactory(protocol.ClientFactory):
   protocol = BotCore
