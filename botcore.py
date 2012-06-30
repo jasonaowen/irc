@@ -34,6 +34,9 @@ class BotCore(irc.IRCClient):
         if callable(method):
           handled = method(*args)
 
+  def action(self, user, channel, data):
+    self.handleEvent("action", self, channel, user, data)
+
   def noticed(self, user, channel, message):
     self.handleEvent("notice", self, channel, user, message)
 
@@ -60,7 +63,7 @@ class BotCoreFactory(protocol.ClientFactory):
     self.messageHandlers = []
     for module in modules:
       m = __import__(module["module"])
-      c = m.__dict__[module["class"]]
+      c = getattr(m, module["class"])
       print "Adding class '%s' from module '%s' as message handler." % \
         (module["class"], module["module"],)
       self.messageHandlers.append(c(module["args"]))
