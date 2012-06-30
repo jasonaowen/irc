@@ -73,7 +73,11 @@ class BotCoreFactory(protocol.ClientFactory):
     print "Could not connect: %s" % (reason,)
 
 if __name__ == "__main__":
-  configFile = open("config.yaml")
+  if len(sys.argv) != 2:
+    print "Usage: python %s config.yaml" % (__file__,)
+    sys.exit(1)
+
+  configFile = open(sys.argv[1])
   config = yaml.load(configFile)
   configFile.close()
 
