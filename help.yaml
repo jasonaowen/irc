@@ -1,0 +1,34 @@
+about:
+  - >
+    Storybot, Copyright 2012 Jason Owen <jason.a.owen@gmail.com>. Source
+    available at http://owenja.dyndns.org/hg/irc/storybot/ .
+join:
+  - >
+    When a story is forming, you can say "%(botname)s: I'm in" to be a part
+    of the story when it starts. After a story has started, or while it is
+    still forming, you can "/msg %(botname)s I'm in" to participate.
+start:
+  - >
+    When you want storytime to start, tell %(botname)s "create story" in
+    %(channel)s to let people start joining. When enough people have joined,
+    tell %(botname)s "start story" to begin the story itself.
+attrib:
+  - >
+    While a story is active, you can set your author line with the attrib
+    command. Type "/msg %(botname)s attrib authorline" to do so.
+  - >
+    An author line can include your nickname, your email address, your
+    website, or anything else. It will be included in the authors section
+    of the story when it is finished.
+story:
+  - >
+    Stories are moderated by %(botname)s. Each person adds a line in the story
+    and, optionally, tags the next person by ending the line with @nick. For
+    example:
+  - >
+    The man ducked under the eve of the nearest building to get out of the
+    rain. @foo
+  - >
+    The user foo, if they are in the story, will have the opportunity to add
+    the next line, and so on. A story is over when the line "The End" is
+    added.

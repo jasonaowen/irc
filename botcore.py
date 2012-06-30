@@ -63,7 +63,7 @@ class BotCoreFactory(protocol.ClientFactory):
       c = m.__dict__[module["class"]]
       print "Adding class '%s' from module '%s' as message handler." % \
         (module["class"], module["module"],)
-      self.messageHandlers.append(c())
+      self.messageHandlers.append(c(module["args"]))
 
   def clientConnectionLost(self, connector, reason):
     print "Lost connection (%s), reconnecting." % (reason,)

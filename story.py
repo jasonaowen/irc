@@ -3,7 +3,7 @@ import random
 import datetime
 
 class Storybot:
-  def __init__(self):
+  def __init__(self, args):
     self.state = "idle"
     self.attrib = {}
     self.pendingUsers = set()
@@ -14,28 +14,21 @@ class Storybot:
     (nick,remain) = name.split('!')
     (user,host) = remain.split('@')
     # client.whois(nick)
-    if message.lower() == "help":
-      for reply in client.factory.messages["help"]["general"]:
-        client.msg(nick, reply.strip())
-      return False # allow other modules to add help
-    elif message.find("help") == 0:
-      if client.factory.messages["help"].has_key(message[5:].lower()):
-        for reply in client.factory.messages["help"][message[5:]]:
-          client.msg(nick, reply.strip())
+    if message.find("attrib") == 0:
+      attrib = message[7:]
+      if len(attrib) > 0:
+        if nick in self.pendingUsers:
+          self.pendingUsers.discard(nick)
+          self.readyUsers.add(nick)
+        self.attrib[nick] = attrib
+        client.msg(nick, "You will be attributed as '%s'." % (attrib,))
+        return True
       else:
-        client.msg(nick, "No help found for that topic.")
-      return False
-    elif message.find("attrib") == 0:
-      if nick in self.pendingUsers:
-        self.pendingUsers.discard(nick)
-        self.readyUsers.add(nick)
-      self.attrib[nick] = message[7:]
-      client.msg(nick, "You will be attributed as '%s'." % (message[7:],))
+        client.msg(nick, "You must specify an attribution line!")
+        return False
     elif message.lower() == "i'm in":
       self.addUser(client, name)
-    elif message.lower() in client.factory.messages["help"]:
-      for reply in client.factory.messages["help"][message.lower()]:
-        client.msg(nick, reply.strip())
+      return True
 
   def channelMessage(self, client, channel, name, message):
     nick = name.split("!")[0]
@@ -47,6 +40,7 @@ class Storybot:
           self.readyUsers = set()
           client.say(channel, "Starting story! Tell me you're in to be a part of it, or 'start' to begin the story.")
           # do other story start stuff here
+          return True
         else:
           pass # command
     elif self.state == "pending":
@@ -54,6 +48,7 @@ class Storybot:
         message = message[len(client.nickname)+2:]
         if message == "I'm in":
           self.addUser(client, name)
+          return True
         elif message == "start story":
           if nick in self.readyUsers:
             self.state = "starting"
@@ -61,13 +56,17 @@ class Storybot:
             client.sendLine("NAMES %s" % channel)
           else:
             client.say(channel, "%s: you're not even taking part!" % (nick,))
+          return True
         else:
           print "Unrecognized command from %s in %s: %s" % (nick, channel, message,)
+          return False
       elif message == "I'm in":
         self.addUser(client, name)
+        return True
     elif self.state == "starting":
       if message.find("I'm in"):
         self.addUser(client, name)
+        return True
     elif self.state == "active":
       if '@' in message:
         (line, nextUser) = message.split('@')
@@ -104,7 +103,8 @@ class Storybot:
         self.nextUser = nextUser
         self.readyUsers.remove(self.nextUser)
         client.mode(channel, True, "v", None, self.nextUser)
-    return True
+      return True
+    return False
 
   def unknownCommand(self, client, prefix, command, params):
     if command == '330' or command == 'RPL_WHOISACCOUNT':

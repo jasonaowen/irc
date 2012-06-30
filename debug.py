@@ -1,4 +1,6 @@
 class DebugHandler:
+  def __init__(self, args):
+    pass
   def privateMessage(self, client, name, message):
     print "Private message from %s: %s" % (name, message,)
     return False
