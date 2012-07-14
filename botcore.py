@@ -1,3 +1,23 @@
+# botcore.py
+# This is the common core of the irc bot which parses the config file,  makes
+# the connection to the irc server, loads the specified modules, joins the
+# channels, and dispatches the various messages.
+
+# Copyright 2012 Jason Owen <jason.a.owen@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from twisted.internet import protocol, reactor, ssl
 from twisted.words.protocols import irc
 import sys

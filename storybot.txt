@@ -19,3 +19,9 @@ ideas:
   FFA story mode - all in have voice at once
     except for the last person to speak?
   lightning round!
+  prefer people who respond more quickly
+
+bugs/todo:
+  'attrib ' should show help
+  authors section should be based on contributions, not ready users
+  author lines should persist
