@@ -14,7 +14,7 @@ class Storybot:
     (nick,remain) = name.split('!')
     (user,host) = remain.split('@')
     # client.whois(nick)
-    if message.find("attrib") == 0:
+    if message.lower().find("attrib") == 0:
       attrib = message[7:]
       if len(attrib) > 0:
         if nick in self.pendingUsers:
@@ -29,25 +29,31 @@ class Storybot:
     elif message.lower() == "i'm in":
       self.addUser(client, name)
       return True
+    elif message.lower() == "i'm out":
+      self.removeUser(client, name)
+      return True
 
   def channelMessage(self, client, channel, name, message):
     nick = name.split("!")[0]
     if self.state == "idle":
-      if message.find(client.nickname) == 0:
-        if message[len(client.nickname)+2:] == "create story":
+      if message.lower().find(client.nickname) == 0:
+        if message.lower()[len(client.nickname)+2:] == "create story":
           self.state = "pending"
           self.pendingUsers = set()
           self.readyUsers = set()
-          client.say(channel, "Starting story! Tell me you're in to be a part of it, or 'start' to begin the story.")
+          client.say(channel, "Starting story! Tell me you're in to be a part of it, or 'start story' to begin the story.")
           # do other story start stuff here
           return True
         else:
           pass # command
     elif self.state == "pending":
-      if message.find(client.nickname) == 0:
+      if message.lower().find(client.nickname) == 0:
         message = message[len(client.nickname)+2:]
-        if message == "I'm in":
+        if message.lower() == "i'm in":
           self.addUser(client, name)
+          return True
+        elif message.lower() == "i'm out":
+          self.removeUser(client, name)
           return True
         elif message == "start story":
           if nick in self.readyUsers:
@@ -60,11 +66,14 @@ class Storybot:
         else:
           print "Unrecognized command from %s in %s: %s" % (nick, channel, message,)
           return False
-      elif message == "I'm in":
+      elif message.lower() == "i'm in":
         self.addUser(client, name)
         return True
+      elif message.lower() == "i'm out":
+        self.removeUser(client, name)
+        return True
     elif self.state == "starting":
-      if message.find("I'm in"):
+      if message.lower().find("I'm in"):
         self.addUser(client, name)
         return True
     elif self.state == "active":
@@ -143,3 +152,8 @@ class Storybot:
           self.pendingUsers.add(nick)
       else:
         self.readyUsers.add(nick)
+
+  def removeUser(self, client, user):
+    nick = user.split("!")[0]
+    if nick in self.readyUsers:
+      self.readyUsers.discard(nick)

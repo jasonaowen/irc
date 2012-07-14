@@ -9,8 +9,8 @@ join:
     still forming, you can "/msg %(botname)s I'm in" to participate.
 start:
   - >
-    When you want storytime to start, tell %(botname)s "create story" in
-    %(channel)s to let people start joining. When enough people have joined,
+    When you want storytime to start, tell %(botname)s "create story" to let
+    people start joining. When enough people have joined,
     tell %(botname)s "start story" to begin the story itself.
 attrib:
   - >
