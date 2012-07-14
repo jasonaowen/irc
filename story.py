@@ -36,7 +36,7 @@ class Storybot:
   def channelMessage(self, client, channel, name, message):
     nick = name.split("!")[0]
     if self.state == "idle":
-      if message.lower().find(client.nickname) == 0:
+      if message.lower().find(client.nickname.lower()) == 0:
         if message.lower()[len(client.nickname)+2:] == "create story":
           self.state = "pending"
           self.pendingUsers = set()
@@ -47,7 +47,7 @@ class Storybot:
         else:
           pass # command
     elif self.state == "pending":
-      if message.lower().find(client.nickname) == 0:
+      if message.lower().find(client.nickname.lower()) == 0:
         message = message[len(client.nickname)+2:]
         if message.lower() == "i'm in":
           self.addUser(client, name)
@@ -73,7 +73,7 @@ class Storybot:
         self.removeUser(client, name)
         return True
     elif self.state == "starting":
-      if message.lower().find("I'm in"):
+      if message.lower().find("i'm in"):
         self.addUser(client, name)
         return True
     elif self.state == "active":
