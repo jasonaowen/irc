@@ -114,8 +114,8 @@ class Storybot:
         print >> f, "Story in %s, finished at %s" % (channel, finished,)
         print >> f, ""
         print >> f, "Authors:"
-        for author in self.readyUsers:
-          print >> f, "  %s" % self.attrib[author]
+        for line in self.lines:
+          print >> f, "  %s" % self.attrib[line[0]]
         print >> f, ""
         print >> f, "This story is published under the Creative Commons Attribution-ShareAlike 3.0 License."
         print >> f, "You may copy it, edit it, or sell it, so long as you include the Authors section above."
