@@ -60,6 +60,7 @@ class Storybot:
           self.state = "pending"
           self.pendingUsers = set()
           self.readyUsers = set()
+          self.contributors = set()
           client.say(channel, "Starting story! Tell me you're in to be a part of it, or 'start story' to begin the story.")
           # do other story start stuff here
           return True
@@ -106,6 +107,7 @@ class Storybot:
       if nextUser not in self.readyUsers:
         nextUser = random.sample(self.readyUsers, 1)[0]
       client.mode(channel, False, "v", None, self.nextUser)
+      self.contributors.add(nick) # not self.nextUser because someone else may have spoken
       self.readyUsers.add(self.nextUser)
       self.lines.append((nick, line))
       if line.lower().find("the end") == 0:
@@ -114,8 +116,11 @@ class Storybot:
         print >> f, "Story in %s, finished at %s" % (channel, finished,)
         print >> f, ""
         print >> f, "Authors:"
-        for line in self.lines:
-          print >> f, "  %s" % self.attrib[line[0]]
+        for contributor in self.contributors:
+          if contributor in self.attrib:
+            print >> f, "  %s" % self.attrib[contributor]
+          else:
+            print >> f, "  %s" % contributor
         print >> f, ""
         print >> f, "This story is published under the Creative Commons Attribution-ShareAlike 3.0 License."
         print >> f, "You may copy it, edit it, or sell it, so long as you include the Authors section above."
