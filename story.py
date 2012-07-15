@@ -76,9 +76,13 @@ class Storybot:
           self.removeUser(client, name)
           return True
         elif message == "start story":
-          if nick in self.readyUsers:
+          if len(self.readyUsers) < 2:
+            client.say(channel, "There aren't enough people yet!")
+            return True
+          elif nick in self.readyUsers:
             self.state = "starting"
             self.nextUser = nick # or choose at random
+            self.readyUsers.remove(nick) # don't allow them to be next
             client.sendLine("NAMES %s" % channel)
           else:
             client.say(channel, "%s: you're not even taking part!" % (nick,))
