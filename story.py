@@ -168,10 +168,10 @@ class Storybot:
       client.msg(nick, "You are already in!")
     else:
       for message in client.factory.messages["register"]:
-        client.msg(nick, message.strip())
+        client.msg(nick, message.strip() % {"botname": client.nickname})
       if not self.attrib.has_key(nick):
         for message in client.factory.messages["needAttrib"]:
-          client.msg(nick, message.strip())
+          client.msg(nick, message.strip() % {"botname": client.nickname})
         if nick not in self.pendingUsers:
           self.pendingUsers.add(nick)
       else:
