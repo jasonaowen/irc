@@ -19,7 +19,7 @@ ideas:
   FFA story mode - all in have voice at once
     except for the last person to speak?
   lightning round!
-  prefer people who respond more quickly
+  nextUser algorithm: randomly order list, iterate, restart; newly-added users go to top
 
 bugs/todo:
   'attrib ' should show help

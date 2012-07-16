@@ -61,6 +61,7 @@ class Storybot:
           self.pendingUsers = set()
           self.readyUsers = set()
           self.contributors = set()
+          self.recentUsers = []
           client.say(channel, "Starting story! Tell me you're in to be a part of it, or 'start story' to begin the story.")
           # do other story start stuff here
           return True
@@ -109,7 +110,7 @@ class Storybot:
         nextUser = None
 
       if nextUser not in self.readyUsers:
-        nextUser = random.sample(self.readyUsers, 1)[0]
+        nextUser = self.chooseNextUser(self.nextUser)
       client.mode(channel, False, "v", None, self.nextUser)
       self.contributors.add(nick) # not self.nextUser because someone else may have spoken
       self.readyUsers.add(self.nextUser)
@@ -185,3 +186,9 @@ class Storybot:
     nick = user.split("!")[0]
     if nick in self.readyUsers:
       self.readyUsers.discard(nick)
+
+  def chooseNextUser(self, previousUser):
+    self.recentUsers.append(previousUser)
+    if len(self.recentUsers) > len(self.readyUsers)/2:
+      self.recentUsers.pop(0)
+    return random.sample(self.readyUsers - frozenset(self.recentUsers), 1)[0]
