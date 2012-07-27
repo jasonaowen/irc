@@ -90,7 +90,7 @@ class BotCoreFactory(protocol.ClientFactory):
 
   def clientConnectionLost(self, connector, reason):
     print "Lost connection (%s), reconnecting." % (reason,)
-    #connector.connect()
+    connector.connect()
 
   def clientConnectionFailed(self, connector, reason):
     print "Could not connect: %s" % (reason,)
