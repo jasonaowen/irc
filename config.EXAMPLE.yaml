@@ -11,8 +11,9 @@ irc:
     - {name: '#example', key: }
     - {name: '#example-test', key: 'botsonly'}
   operator: Blort # nick of person who can issue restricted commands
-database:
-  type: sqlite
-  filename: example.db
+modules:
+  - {module: debug, class: DebugHandler, args: }
+  - {module: story, class: Storybot, args:}
+  - {module: help, class: HelpHandler, args: 'help.yaml'}
 messages:
   register: You need to register!
