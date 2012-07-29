@@ -37,7 +37,7 @@ class BotCore(irc.IRCClient):
   def signedOn(self):
     print "Signed on as %s." % (self.nickname,)
     for channel in self.factory.channels:
-      print "Joining %s with key %s..." % (channel["name"], channel["key"])
+      print "Joining %s with key %s..." % (channel["name"], channel["key"],)
       self.join(channel["name"], channel["key"])
 
   def joined(self, channel):
@@ -86,14 +86,15 @@ class BotCoreFactory(protocol.ClientFactory):
       print "Adding class '%s' from module '%s' as message handler." % \
         (module["class"], module["module"],)
       if hasattr(module["args"], "get") and module["args"].has_key("yaml"):
-        print "  Loading yaml file '%s'." % (module["args"]["yaml"])
-        configFile = open(module["args"]["yaml"])
-        config = yaml.load(configFile)
-        configFile.close()
-        self.messageHandlers.append(c(config))
+        yamlFileName = module["args"].pop("yaml")
+        print "  Loading yaml file '%s'." % (yamlFileName,)
+        print "  Passing argument '%s'." % (module["args"],)
+        yamlFile = open(yamlFileName)
+        module["args"]["yaml"] = yaml.load(yamlFile)
+        yamlFile.close()
       else:
-        print "  Passing argument '%s'." % (module["args"])
-        self.messageHandlers.append(c(module["args"]))
+        print "  Passing argument '%s'." % (module["args"],)
+      self.messageHandlers.append(c(module["args"]))
 
   def clientConnectionLost(self, connector, reason):
     print "Lost connection (%s), reconnecting." % (reason,)

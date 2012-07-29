@@ -27,7 +27,9 @@ class Storybot:
     self.attribUsers = {}
     self.pendingUsers = set()
     self.readyUsers = set()
-    self.messages = args
+    self.messages = args["yaml"]
+    self.url = args["url"]
+    self.path = args["path"]
     # load names and such from db
 
   def privateMessage(self, client, name, message):
@@ -131,7 +133,7 @@ class Storybot:
 
   def publishStory(self, client, channel):
     finished = datetime.datetime.now().strftime("%Y-%m-%dt%H%M")
-    f = open("storybot/%s.txt" % finished, "w")
+    f = open("%s/%s.txt" % (self.path, finished,), "w")
     print >> f, "Story in %s, finished at %s" % (channel, finished,)
     print >> f, ""
     print >> f, "Authors:"
@@ -147,7 +149,7 @@ class Storybot:
     for line in self.lines:
       print >> f, line[1]
     f.close()
-    client.say(channel, "Story published at http://owenja.dyndns.org/%s" % f.name)
+    client.say(channel, "Story published at %s/%s.txt" % (self.url, finished,))
 
   def createStory(self, client, channel):
     self.state = "pending"

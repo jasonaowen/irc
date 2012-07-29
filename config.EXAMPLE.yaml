@@ -12,5 +12,10 @@ irc:
   operator: Blort # nick of person who can issue restricted commands
 modules:
   - { module: debug, class: DebugHandler, args: }
-  - { module: story, class: Storybot,     args: { yaml: storybot.yaml } }
+  - module: story
+    class: Storybot
+    args:
+      path: '/var/www/'
+      url: 'http://www.example.com'
+      yaml: storybot.yaml
   - { module: help,  class: HelpHandler,  args: { yaml: help.yaml } }
