@@ -27,6 +27,7 @@ class Storybot:
     self.attribUsers = {}
     self.pendingUsers = set()
     self.readyUsers = set()
+    self.messages = args
     # load names and such from db
 
   def privateMessage(self, client, name, message):
@@ -107,10 +108,10 @@ class Storybot:
     if nick in self.readyUsers:
       client.msg(nick, "You are already in!")
     else:
-      for message in client.factory.messages["register"]:
+      for message in self.messages["register"]:
         client.msg(nick, message.strip() % {"botname": client.nickname})
       if not self.attribUsers.has_key(nick):
-        for message in client.factory.messages["needAttrib"]:
+        for message in self.messages["needAttrib"]:
           client.msg(nick, message.strip() % {"botname": client.nickname})
         if nick not in self.pendingUsers:
           self.pendingUsers.add(nick)
@@ -140,9 +141,8 @@ class Storybot:
       else:
         print >> f, "  %s" % contributor
     print >> f, ""
-    print >> f, "This story is published under the Creative Commons Attribution-ShareAlike 3.0 License."
-    print >> f, "You may copy it, edit it, or sell it, so long as you include the Authors section above."
-    print >> f, "More details at http://creativecommons.org/licenses/by-sa/3.0/"
+    for message in self.messages["storyLicense"]:
+      print >> f, message
     print >> f, ""
     for line in self.lines:
       print >> f, line[1]

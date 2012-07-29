@@ -50,7 +50,7 @@ class BotCore(irc.IRCClient):
     handled = False
     for handler in self.factory.messageHandlers:
       if not handled and methodName in dir(handler):
-        method = getattr(handler, methodName)
+        method = getattr(handler, methodName, False)
         if callable(method):
           handled = method(*args)
 
@@ -72,13 +72,12 @@ class BotCore(irc.IRCClient):
 class BotCoreFactory(protocol.ClientFactory):
   protocol = BotCore
 
-  def __init__(self, username, password, operator, nickname, channels, modules, messages):
+  def __init__(self, username, password, operator, nickname, channels, modules):
     self.username = username
     self.password = password
     self.operator = operator
     self.nickname = nickname
     self.channels = channels
-    self.messages = messages
 
     self.messageHandlers = []
     for module in modules:
@@ -86,7 +85,15 @@ class BotCoreFactory(protocol.ClientFactory):
       c = getattr(m, module["class"])
       print "Adding class '%s' from module '%s' as message handler." % \
         (module["class"], module["module"],)
-      self.messageHandlers.append(c(module["args"]))
+      if hasattr(module["args"], "get") and module["args"].has_key("yaml"):
+        print "  Loading yaml file '%s'." % (module["args"]["yaml"])
+        configFile = open(module["args"]["yaml"])
+        config = yaml.load(configFile)
+        configFile.close()
+        self.messageHandlers.append(c(config))
+      else:
+        print "  Passing argument '%s'." % (module["args"])
+        self.messageHandlers.append(c(module["args"]))
 
   def clientConnectionLost(self, connector, reason):
     print "Lost connection (%s), reconnecting." % (reason,)
@@ -109,8 +116,7 @@ if __name__ == "__main__":
                        config["irc"]["operator"],
                        config["irc"]["nickname"],
                        config["irc"]["channels"],
-                       config["modules"],
-                       config["messages"])
+                       config["modules"])
 
   if config["irc"]["server"]["ssl"]:
     reactor.connectSSL(config["irc"]["server"]["address"],

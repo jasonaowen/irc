@@ -17,12 +17,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import yaml
 class HelpHandler:
-  def __init__(self, messageFilePath):
-    messageFile = open(messageFilePath)
-    self.messages = yaml.load(messageFile)
-    messageFile.close()
+  def __init__(self, messages):
+    self.messages = messages
 
   def privateMessage(self, client, name, message):
     nick = name.split("!")[0]

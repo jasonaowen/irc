@@ -6,14 +6,11 @@ irc:
     username: foo
     password: bar
   nickname: Examplebot
-  nickservPassword: baz
   channels:
-    - {name: '#example', key: }
-    - {name: '#example-test', key: 'botsonly'}
+    - { name: '#example', key: }
+    - { name: '#example-test', key: 'password' }
   operator: Blort # nick of person who can issue restricted commands
 modules:
-  - {module: debug, class: DebugHandler, args: }
-  - {module: story, class: Storybot, args:}
-  - {module: help, class: HelpHandler, args: 'help.yaml'}
-messages:
-  register: You need to register!
+  - { module: debug, class: DebugHandler, args: }
+  - { module: story, class: Storybot,     args: { yaml: storybot.yaml } }
+  - { module: help,  class: HelpHandler,  args: { yaml: help.yaml } }

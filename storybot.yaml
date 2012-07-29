@@ -1,0 +1,16 @@
+register:
+  - >
+    By participating in a story, you agree that your contributions may be used
+    under the Creative Commons Attribution-ShareAlike 3.0 Unported License (
+    http://creativecommons.org/licenses/by-sa/3.0/ ).
+needAttrib:
+  - >
+    How would you like to be recognized? You can use your nickname, or your
+    real name, or your email address, or a URL, or some combination of all
+    of these. This will show up in the authors section of the story.
+  - >
+    /msg %(botname)s attrib John Doe <user@example.com>
+storyLicense:
+  - This story is published under the Creative Commons Attribution-ShareAlike 3.0 License.
+  - You may copy it, edit it, or sell it, so long as you credit the authors listed above.
+  - More details at http://creativecommons.org/licenses/by-sa/3.0/
