@@ -16,22 +16,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import yaml
+import datetime
+
 class DebugHandler:
   def __init__(self, args):
     pass
   def action(self, client, channel, name, message):
-    print "%s/%s did %s" % (channel, name, message,)
+    print "%s: %s/%s did %s" % (self.now(), channel, name, message,)
     return False
   def channelMessage(self, client, channel, name, message):
-    print "%s/%s: %s" % (channel, name, message,)
+    print "%s: %s/%s: %s" % (self.now(), channel, name, message,)
     return False
   def notice(self, client, channel, user, message):
-    print "Notice on channel %s by user %s: %s" % (channel, user, message,)
+    print "%s: Notice on channel %s by user %s: %s" % (self.now(), channel, user, message,)
     return False
   def privateMessage(self, client, name, message):
-    print "Private message from %s: %s" % (name, message,)
+    print "%s: Private message from %s: %s" % (self.now(), name, message,)
     return False
   def unknownCommand(self, client, prefix, command, params):
-    print "%s %s %s" % (prefix, command, params,)
+    print "%s: %s %s %s" % (self.now(), prefix, command, params,)
     return False
+  def now(self):
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
