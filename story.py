@@ -24,7 +24,7 @@ import datetime
 class Storybot:
   def __init__(self, args):
     self.state = "idle"
-    self.attrib = {}
+    self.attribUsers = {}
     self.pendingUsers = set()
     self.readyUsers = set()
     # load names and such from db
@@ -34,17 +34,7 @@ class Storybot:
     (user,host) = remain.split('@')
     # client.whois(nick)
     if message.lower().find("attrib") == 0:
-      attrib = message[7:]
-      if len(attrib) > 0:
-        if nick in self.pendingUsers:
-          self.pendingUsers.discard(nick)
-          self.readyUsers.add(nick)
-        self.attrib[nick] = attrib
-        client.msg(nick, "You will be attributed as '%s'." % (attrib,))
-        return True
-      else:
-        client.msg(nick, "You must specify an attribution line!")
-        return False
+      return self.attrib(client, nick, message)
     elif message.lower() == "i'm in":
       self.addUser(client, name)
       return True
@@ -57,13 +47,7 @@ class Storybot:
     if self.state == "idle":
       if message.lower().find(client.nickname.lower()) == 0:
         if message.lower()[len(client.nickname)+2:] == "create story":
-          self.state = "pending"
-          self.pendingUsers = set()
-          self.readyUsers = set()
-          self.contributors = set()
-          self.recentUsers = []
-          client.say(channel, "Starting story! Tell me you're in to be a part of it, or 'start story' to begin the story.")
-          # do other story start stuff here
+          self.createStory(client, channel)
           return True
         else:
           pass # command
@@ -77,16 +61,7 @@ class Storybot:
           self.removeUser(client, name)
           return True
         elif message == "start story":
-          if len(self.readyUsers) < 2:
-            client.say(channel, "There aren't enough people yet!")
-            return True
-          elif nick in self.readyUsers:
-            self.state = "starting"
-            self.nextUser = nick # or choose at random
-            self.readyUsers.remove(nick) # don't allow them to be next
-            client.sendLine("NAMES %s" % channel)
-          else:
-            client.say(channel, "%s: you're not even taking part!" % (nick,))
+          self.startStory(client, channel, nick)
           return True
         else:
           print "Unrecognized command from %s in %s: %s" % (nick, channel, message,)
@@ -102,46 +77,7 @@ class Storybot:
         self.addUser(client, name)
         return True
     elif self.state == "active":
-      if '@' in message:
-        (line, nextUser) = message.split('@')
-        nextUser = nextUser.strip()
-      else:
-        line = message
-        nextUser = None
-
-      if nextUser not in self.readyUsers:
-        nextUser = self.chooseNextUser(self.nextUser)
-      client.mode(channel, False, "v", None, self.nextUser)
-      self.contributors.add(nick) # not self.nextUser because someone else may have spoken
-      self.readyUsers.add(self.nextUser)
-      self.lines.append((nick, line))
-      if line.lower().find("the end") == 0:
-        finished = datetime.datetime.now().strftime("%Y-%m-%dt%H%M")
-        f = open("storybot/%s.txt" % finished, "w")
-        print >> f, "Story in %s, finished at %s" % (channel, finished,)
-        print >> f, ""
-        print >> f, "Authors:"
-        for contributor in self.contributors:
-          if contributor in self.attrib:
-            print >> f, "  %s" % self.attrib[contributor]
-          else:
-            print >> f, "  %s" % contributor
-        print >> f, ""
-        print >> f, "This story is published under the Creative Commons Attribution-ShareAlike 3.0 License."
-        print >> f, "You may copy it, edit it, or sell it, so long as you include the Authors section above."
-        print >> f, "More details at http://creativecommons.org/licenses/by-sa/3.0/"
-        print >> f, ""
-        for line in self.lines:
-          print >> f, line[1]
-        f.close()
-        client.say(channel, "Story published at http://owenja.dyndns.org/%s" % f.name)
-        self.state = "idle"
-        client.mode(channel, False, "m")
-      else:
-        self.nextUser = nextUser
-        self.readyUsers.remove(self.nextUser)
-        client.mode(channel, True, "v", None, self.nextUser)
-        client.msg(self.nextUser, "It's your turn in %s!" % channel)
+      self.storyLine(client, channel, nick, message)
       return True
     return False
 
@@ -152,7 +88,6 @@ class Storybot:
     elif command == 'RPL_NAMREPLY':
       if self.state == "starting":
         # deop and devoice everyone
-        print "Debug: client.nickname = %s" % (client.nickname,)
         for user in params[3].split(' '):
           if user[1:].lower() == "chanserv" or user[1:] == client.nickname: continue
           if user[0] == '@':
@@ -174,7 +109,7 @@ class Storybot:
     else:
       for message in client.factory.messages["register"]:
         client.msg(nick, message.strip() % {"botname": client.nickname})
-      if not self.attrib.has_key(nick):
+      if not self.attribUsers.has_key(nick):
         for message in client.factory.messages["needAttrib"]:
           client.msg(nick, message.strip() % {"botname": client.nickname})
         if nick not in self.pendingUsers:
@@ -192,3 +127,80 @@ class Storybot:
     if len(self.recentUsers) > len(self.readyUsers)/2:
       self.recentUsers.pop(0)
     return random.sample(self.readyUsers - frozenset(self.recentUsers), 1)[0]
+
+  def publishStory(self, client, channel):
+    finished = datetime.datetime.now().strftime("%Y-%m-%dt%H%M")
+    f = open("storybot/%s.txt" % finished, "w")
+    print >> f, "Story in %s, finished at %s" % (channel, finished,)
+    print >> f, ""
+    print >> f, "Authors:"
+    for contributor in self.contributors:
+      if contributor in self.attribUsers:
+        print >> f, "  %s" % self.attribUsers[contributor]
+      else:
+        print >> f, "  %s" % contributor
+    print >> f, ""
+    print >> f, "This story is published under the Creative Commons Attribution-ShareAlike 3.0 License."
+    print >> f, "You may copy it, edit it, or sell it, so long as you include the Authors section above."
+    print >> f, "More details at http://creativecommons.org/licenses/by-sa/3.0/"
+    print >> f, ""
+    for line in self.lines:
+      print >> f, line[1]
+    f.close()
+    client.say(channel, "Story published at http://owenja.dyndns.org/%s" % f.name)
+
+  def createStory(self, client, channel):
+    self.state = "pending"
+    self.pendingUsers = set()
+    self.readyUsers = set()
+    self.contributors = set()
+    self.recentUsers = []
+    client.say(channel, "Starting story! Tell me you're in to be a part of it, or 'start story' to begin the story.")
+
+  def startStory(self, client, channel, nick):
+    if len(self.readyUsers) < 2:
+      client.say(channel, "There aren't enough people yet!")
+    elif nick in self.readyUsers:
+      self.state = "starting"
+      self.nextUser = nick # or choose at random
+      self.readyUsers.remove(nick) # don't allow them to be next
+      client.sendLine("NAMES %s" % channel)
+    else:
+      client.say(channel, "%s: you're not even taking part!" % (nick,))
+
+  def storyLine(self, client, channel, nick, message):
+    if '@' in message:
+      (line, nextUser) = message.split('@')
+      nextUser = nextUser.strip()
+    else:
+      line = message
+      nextUser = None
+
+    if nextUser not in self.readyUsers:
+      nextUser = self.chooseNextUser(self.nextUser)
+    client.mode(channel, False, "v", None, self.nextUser)
+    self.contributors.add(nick) # not self.nextUser because someone else may have spoken
+    self.readyUsers.add(self.nextUser)
+    self.lines.append((nick, line))
+    if line.lower().find("the end") == 0:
+      self.publishStory(client, channel)
+      self.state = "idle"
+      client.mode(channel, False, "m")
+    else:
+      self.nextUser = nextUser
+      self.readyUsers.remove(self.nextUser)
+      client.mode(channel, True, "v", None, self.nextUser)
+      client.msg(self.nextUser, "It's your turn in %s!" % channel)
+
+  def attrib(self, client, nick, message):
+    attrib = message[7:]
+    if len(attrib) > 0:
+      if nick in self.pendingUsers:
+        self.pendingUsers.discard(nick)
+        self.readyUsers.add(nick)
+      self.attribUsers[nick] = attrib
+      client.msg(nick, "You will be attributed as '%s'." % (attrib,))
+      return True
+    else:
+      client.msg(nick, "You must specify an attribution line!")
+      return False
