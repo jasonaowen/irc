@@ -1,0 +1,14 @@
+ideas:
+  echo moderated comments to meta channel
+  FFA story mode - all in have voice at once
+    except for the last person to speak?
+  lightning round!
+  nextUser algorithm: randomly order list, iterate, restart; newly-added users go to top
+  command to get active users
+  vote on name of story
+
+bugs/todo:
+  'attrib ' should show help
+  author lines should persist
+  parameterize publish directory
+  handle parts
