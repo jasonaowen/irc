@@ -19,7 +19,7 @@
 
 class HelpHandler:
   def __init__(self, messages):
-    self.messages = messages
+    self.messages = messages["yaml"]
 
   def privateMessage(self, client, name, message):
     nick = name.split("!")[0]
