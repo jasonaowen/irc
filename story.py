@@ -124,6 +124,8 @@ class Storybot:
     nick = user.split("!")[0]
     if nick in self.readyUsers:
       self.readyUsers.discard(nick)
+      for message in self.messages["leave"]:
+        client.msg(nick, message % {"botname": client.nickname})
 
   def chooseNextUser(self, previousUser):
     self.recentUsers.append(previousUser)
