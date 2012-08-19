@@ -1,7 +1,7 @@
 about:
   - >
     Storybot, Copyright 2012 Jason Owen <jason.a.owen@gmail.com>. Source
-    available at http://owenja.dyndns.org/hg/irc/storybot/ .
+    available at http://owenja.dyndns.org/hg/irc/ .
 join:
   - >
     When a story is forming, you can say "%(botname)s: I'm in" to be a part
