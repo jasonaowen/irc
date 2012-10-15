@@ -46,6 +46,22 @@ class Mentor:
         self.addUserChannelAssociation(user, channel)
     return False
 
+  def userJoined(self, client, user, channel):
+    self.addUserChannelAssociation(user, channel)
+    return False
+
+  def userLeft(self, client, user, channel):
+    self.removeUserChannelAssociation(user, channel)
+    return False
+
+  def userQuit(self, client, user, quitMessage):
+    self.removeUser(user)
+    return False
+
+  def userRenamed(self, client, oldname, newname):
+    self.renameUser(oldname, newname)
+    return False
+
   def addUserChannelAssociation(self, user, channel):
     if user not in self.userChannelMap:
       self.userChannelMap[user] = set()
@@ -55,6 +71,31 @@ class Mentor:
       self.channelUserMap[channel] = set()
     self.userChannelMap[user].add(channel)
     self.channelUserMap[channel].add(user)
+
+  def removeUserChannelAssociation(self, user, channel):
+    if user in self.userChannelMap and channel in self.userChannelMap[user]:
+      self.userChannelMap[user].remove(channel)
+
+    if channel in self.channelUserMap and user in self.channelUserMap[channel]:
+      self.channelUserMap[channel].remove(user)
+
+  def removeUser(self, user):
+    if user in self.userChannelMap:
+      del self.userChannelMap[user]
+
+    for channel in self.channelUserMap:
+      if user in channel:
+        channel.remove(user)
+
+  def renameUser(self, oldname, newname):
+    if oldname in self.userChannelMap:
+      self.userChannelMap[newname] = self.userChannelMap[oldname]
+      del self.userChannelMap[oldname]
+
+    for channel in self.channelUserMap:
+      if oldname in channel:
+        channel.remove(oldname)
+        channel.add(newname)
 
   def ask(self, client, nick, message):
     channel = None

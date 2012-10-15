@@ -36,5 +36,17 @@ class DebugHandler:
   def unknownCommand(self, client, prefix, command, params):
     print "%s: %s %s %s" % (self.now(), prefix, command, params,)
     return False
+  def userJoined(self, client, user, channel):
+    print "%s: %s joins %s" % (self.now(), user, channel)
+    return False
+  def userLeft(self, client, user, channel):
+    print "%s: %s leaves %s" % (self.now(), user, channel)
+    return False
+  def userQuit(self, client, user, quitMessage):
+    print "%s: %s quits: %s" % (self.now(), user, quitMessage)
+    return False
+  def userRenamed(self, client, oldname, newname):
+    print "%s: %s is now %s" % (self.now(), oldname, newname)
+    return False
   def now(self):
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")

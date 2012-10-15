@@ -66,6 +66,18 @@ class BotCore(irc.IRCClient):
     else:
       self.handleEvent("channelMessage", self, channel, user, msg)
 
+  def userJoined(self, user, channel):
+    self.handleEvent("userJoined", self, user, channel)
+
+  def userLeft(self, user, channel):
+    self.handleEvent("userLeft", self, user, channel)
+
+  def userQuit(self, user, quitMessage):
+    self.handleEvent("userQuit", self, user, quitMessage)
+
+  def userRenamed(self, oldname, newname):
+    self.handleEvent("userRenamed", self, oldname, newname)
+
   def irc_unknown(self, prefix, command, params):
     self.handleEvent("unknownCommand", self, prefix, command, params)
 
