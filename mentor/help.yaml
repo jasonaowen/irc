@@ -1,0 +1,18 @@
+about:
+  - >
+    Mentorbot, Copyright 2012 Jason Owen <jason.a.owen@gmail.com>. Source
+    available at http://owenja.dyndns.org/hg/irc/ .
+ask:
+  - >
+    If you have a question but you don't want your fellow zombies to know that
+    you're the one asking it, you can ask me and I will relay your question.
+  - >
+    Say 'ask: why is the sky blue?' and in your mentor channel I will say
+    'why is the sky blue?'
+  - >
+    If you are in more than one channel that I am in, you can tell me which
+    channel to ask in by saying 'ask in #example: why is water wet?' and, in
+    #example, I will say 'why is water wet?'
+  - >
+    Your mentors will know that it was you who asked the question, though, so
+    that they can help you directly if needed (and to prevent abuse).
