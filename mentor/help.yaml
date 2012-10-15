@@ -16,3 +16,9 @@ ask:
   - >
     Your mentors will know that it was you who asked the question, though, so
     that they can help you directly if needed (and to prevent abuse).
+join:
+  - >
+    To have me join a channel, you can simply invite me with your irc client.
+  - >
+    If the channel has a password, first say 'join #example sekritpassword',
+    then invite me.

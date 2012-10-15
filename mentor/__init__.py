@@ -24,6 +24,7 @@ class Mentor:
     self.userChannelMap = {}
     self.channelUserMap = {}
     self.reportChannel = args["reportChannel"]
+    self.channelKeyMap = {}
 
   def privateMessage(self, client, name, message):
     (nick,remain) = name.split('!')
@@ -31,6 +32,8 @@ class Mentor:
     # client.whois(nick)
     if message.lower().find("ask") == 0:
       return self.ask(client, nick, message)
+    if message.lower().find("join") == 0:
+      return self.join(client, nick, message)
     return False
 
   def channelMessage(self, client, channel, name, message):
@@ -44,6 +47,14 @@ class Mentor:
           user = user[1:]
         if user.lower() == "chanserv" or user == client.nickname: continue
         self.addUserChannelAssociation(user, channel)
+    elif command == 'INVITE':
+      channel = params[1]
+      if channel in self.channelKeyMap:
+        client.join(channel, self.channelKeyMap[channel])
+        del self.channelKeyMap[channel]
+      else:
+        client.join(channel)
+      return True
     return False
 
   def userJoined(self, client, user, channel):
@@ -125,4 +136,14 @@ class Mentor:
     client.say(self.reportChannel,
       "%(nick)s asks in %(channel)s: %(question)s" %
       {"nick": nick, "channel": channel, "question": question})
+    return True
+
+  def join(self, client, user, message):
+    params = message.split(' ')
+    if len(params) != 3:
+      return False
+    channel = params[1]
+    channelKey = params[2]
+    self.channelKeyMap[channel] = channelKey
+    client.msg(user, "Now invite me by saying '/invite %s %s'" % (client.nickname, channel,))
     return True
