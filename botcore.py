@@ -49,6 +49,9 @@ class BotCore(irc.IRCClient):
   def joined(self, channel):
     self.handleEvent("joined", self, channel)
 
+  def kickedFrom(self, channel, kicker, message):
+    self.handleEvent("kickedFrom", self, channel, kicker, message)
+
   def nickChanged(self, nick):
     print "Nickname changed to %s" % (nick,)
 

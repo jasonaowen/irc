@@ -45,6 +45,19 @@ class Mentor:
       del self.joiningChannelUserMap[channel]
     if channel in self.channelKeyMap:
       del self.channelKeyMap[channel]
+    return False
+
+  def kickedFrom(self, client, channel, kicker, message):
+    for user in self.userChannelMap.itervalues():
+      if channel in user:
+        user.remove(channel)
+    if channel in self.channelUserMap:
+      del self.channelUserMap[channel]
+    if channel in self.joiningChannelUserMap:
+      del self.joiningChannelUserMap[channel]
+    if channel in self.channelKeyMap:
+      del self.channelKeyMap[channel]
+    return False
 
   def unknownCommand(self, client, prefix, command, params):
     if command == 'RPL_NAMREPLY':

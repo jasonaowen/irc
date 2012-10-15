@@ -30,6 +30,9 @@ class DebugHandler:
   def joined(self, client, channel):
     print "%s: Joined %s." % (self.now(), channel,)
     return False
+  def kickedFrom(self, client, channel, kicker, message):
+    print "%s: Kicked from %s by %s because %s." % (self.now(), channel, kicker, message)
+    return False
   def notice(self, client, channel, user, message):
     print "%s: Notice on channel %s by user %s: %s" % (self.now(), channel, user, message,)
     return False
