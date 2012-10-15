@@ -27,6 +27,9 @@ class DebugHandler:
   def channelMessage(self, client, channel, name, message):
     print "%s: %s/%s: %s" % (self.now(), channel, name, message,)
     return False
+  def joined(self, client, channel):
+    print "%s: Joined %s." % (self.now(), channel,)
+    return False
   def notice(self, client, channel, user, message):
     print "%s: Notice on channel %s by user %s: %s" % (self.now(), channel, user, message,)
     return False

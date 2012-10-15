@@ -25,6 +25,7 @@ class Mentor:
     self.channelUserMap = {}
     self.reportChannel = args["reportChannel"]
     self.channelKeyMap = {}
+    self.joiningChannelUserMap = {}
 
   def privateMessage(self, client, name, message):
     (nick,remain) = name.split('!')
@@ -39,6 +40,12 @@ class Mentor:
   def channelMessage(self, client, channel, name, message):
     return False
 
+  def joined(self, client, channel):
+    if channel in self.joiningChannelUserMap:
+      del self.joiningChannelUserMap[channel]
+    if channel in self.channelKeyMap:
+      del self.channelKeyMap[channel]
+
   def unknownCommand(self, client, prefix, command, params):
     if command == 'RPL_NAMREPLY':
       channel = params[2]
@@ -48,13 +55,26 @@ class Mentor:
         if user.lower() == "chanserv" or user == client.nickname: continue
         self.addUserChannelAssociation(user, channel)
     elif command == 'INVITE':
+      (nick,remain) = prefix.split('!')
       channel = params[1]
+      self.joiningChannelUserMap[channel] = nick
       if channel in self.channelKeyMap:
         client.join(channel, self.channelKeyMap[channel])
-        del self.channelKeyMap[channel]
       else:
         client.join(channel)
       return True
+    elif command == 'ERR_BADCHANNELKEY':
+      channel = params[1]
+      if channel in self.joiningChannelUserMap:
+        if channel in self.channelKeyMap:
+          client.msg(self.joiningChannelUserMap[channel],
+            "Unable to join channel '%s': bad key '%s'." % (channel, self.channelKeyMap[channel],))
+        else:
+          client.msg(self.joiningChannelUserMap[channel],
+            "Unable to join channel '%s': bad key. See 'help join'." % (channel,))
+        del self.joiningChannelUserMap[channel]
+      if channel in self.channelKeyMap:
+        del self.channelKeyMap[channel]
     return False
 
   def userJoined(self, client, user, channel):

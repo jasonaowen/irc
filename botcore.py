@@ -41,7 +41,7 @@ class BotCore(irc.IRCClient):
       self.join(channel["name"], channel["key"])
 
   def joined(self, channel):
-    print "Joined %s." % (channel,)
+    self.handleEvent("joined", self, channel)
 
   def nickChanged(self, nick):
     print "Nickname changed to %s" % (nick,)
