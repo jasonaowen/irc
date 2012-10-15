@@ -44,10 +44,8 @@ class HelpHandler:
     nick = name.split("!")[0]
     index = message.lower().find("help")
     if index == 0:
-      print "Calling self.privateMessage"
       return self.privateMessage(client, name, message)
     elif index == 1 or (message.find(client.nickname) == 0 and index > 0):
-      print "Calling self.privateMessage"
       return self.privateMessage(client, name, message[index:])
     else:
       return False
