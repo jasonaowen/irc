@@ -40,22 +40,17 @@ class BotCore(irc.IRCClient):
       print "Joining %s with key %s..." % (channel["name"], channel["key"],)
       self.join(channel["name"], channel["key"])
 
+  def action(self, user, channel, data):
+    self.handleEvent("action", self, channel, user, data)
+
+  def irc_unknown(self, prefix, command, params):
+    self.handleEvent("unknownCommand", self, prefix, command, params)
+
   def joined(self, channel):
     self.handleEvent("joined", self, channel)
 
   def nickChanged(self, nick):
     print "Nickname changed to %s" % (nick,)
-
-  def handleEvent(self, methodName, *args):
-    handled = False
-    for handler in self.factory.messageHandlers:
-      if not handled and methodName in dir(handler):
-        method = getattr(handler, methodName, False)
-        if callable(method):
-          handled = method(*args)
-
-  def action(self, user, channel, data):
-    self.handleEvent("action", self, channel, user, data)
 
   def noticed(self, user, channel, message):
     self.handleEvent("notice", self, channel, user, message)
@@ -78,8 +73,13 @@ class BotCore(irc.IRCClient):
   def userRenamed(self, oldname, newname):
     self.handleEvent("userRenamed", self, oldname, newname)
 
-  def irc_unknown(self, prefix, command, params):
-    self.handleEvent("unknownCommand", self, prefix, command, params)
+  def handleEvent(self, methodName, *args):
+    handled = False
+    for handler in self.factory.messageHandlers:
+      if not handled and methodName in dir(handler):
+        method = getattr(handler, methodName, False)
+        if callable(method):
+          handled = method(*args)
 
 class BotCoreFactory(protocol.ClientFactory):
   protocol = BotCore
