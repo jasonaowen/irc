@@ -33,8 +33,8 @@ class HelpHandler:
       else:
         client.msg(nick, "No help found for that topic.")
       return True
-    elif message.lower() in self.messages:
-      for reply in self.messages[message.lower()]:
+    elif message.lower().split(' ')[0] in self.messages:
+      for reply in self.messages[message.lower().split(' ')[0]]:
         client.msg(nick, reply.strip() % {"botname": client.nickname})
       return True
     else:
