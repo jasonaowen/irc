@@ -38,6 +38,8 @@ class BotCore(irc.IRCClient):
     print "Signed on as %s." % (self.nickname,)
     for channel in self.factory.channels:
       print "Joining %s with key %s..." % (channel["name"], channel["key"],)
+      if "ChanservInvite" in channel and channel["ChanservInvite"] == True:
+        self.msg("Chanserv", "invite %s" % (channel["name"],))
       self.join(channel["name"], channel["key"])
 
   def action(self, user, channel, data):

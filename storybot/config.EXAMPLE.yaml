@@ -8,7 +8,7 @@ irc:
   nickname: Examplebot
   channels:
     - { name: '#example', key: }
-    - { name: '#example-test', key: 'password' }
+    - { name: '#example-test', key: 'password', ChanservInite: Yes }
   operator: Blort # nick of person who can issue restricted commands
 modules:
   - { module: debug, class: DebugHandler, args: }
