@@ -55,7 +55,8 @@ class BotCore(irc.IRCClient):
     self.handleEvent("kickedFrom", self, channel, kicker, message)
 
   def nickChanged(self, nick):
-    print "Nickname changed to %s" % (nick,)
+    self.nickname = nick
+    self.handleEvent("nickChanged", self, nick)
 
   def noticed(self, user, channel, message):
     self.handleEvent("notice", self, channel, user, message)
