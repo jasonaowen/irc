@@ -20,12 +20,9 @@ from twisted.words.protocols import irc
 
 class Mentor:
   def __init__(self, args):
-    self.state = "idle"
     self.userChannelMap = {}
     self.channelUserMap = {}
     self.reportChannel = args["reportChannel"]
-    self.channelKeyMap = {}
-    self.joiningChannelUserMap = {}
 
   def privateMessage(self, client, name, message):
     (nick,remain) = name.split('!')
@@ -33,18 +30,6 @@ class Mentor:
     # client.whois(nick)
     if message.lower().find("ask") == 0:
       return self.ask(client, nick, message)
-    if message.lower().find("join") == 0:
-      return self.join(client, nick, message)
-    return False
-
-  def channelMessage(self, client, channel, name, message):
-    return False
-
-  def joined(self, client, channel):
-    if channel in self.joiningChannelUserMap:
-      del self.joiningChannelUserMap[channel]
-    if channel in self.channelKeyMap:
-      del self.channelKeyMap[channel]
     return False
 
   def kickedFrom(self, client, channel, kicker, message):
@@ -53,10 +38,6 @@ class Mentor:
         user.remove(channel)
     if channel in self.channelUserMap:
       del self.channelUserMap[channel]
-    if channel in self.joiningChannelUserMap:
-      del self.joiningChannelUserMap[channel]
-    if channel in self.channelKeyMap:
-      del self.channelKeyMap[channel]
     return False
 
   def unknownCommand(self, client, prefix, command, params):
@@ -67,27 +48,6 @@ class Mentor:
           user = user[1:]
         if user.lower() == "chanserv" or user == client.nickname: continue
         self.addUserChannelAssociation(user, channel)
-    elif command == 'INVITE':
-      (nick,remain) = prefix.split('!')
-      channel = params[1]
-      self.joiningChannelUserMap[channel] = nick
-      if channel in self.channelKeyMap:
-        client.join(channel, self.channelKeyMap[channel])
-      else:
-        client.join(channel)
-      return True
-    elif command == 'ERR_BADCHANNELKEY':
-      channel = params[1]
-      if channel in self.joiningChannelUserMap:
-        if channel in self.channelKeyMap:
-          client.msg(self.joiningChannelUserMap[channel],
-            "Unable to join channel '%s': bad key '%s'." % (channel, self.channelKeyMap[channel],))
-        else:
-          client.msg(self.joiningChannelUserMap[channel],
-            "Unable to join channel '%s': bad key. See 'help join'." % (channel,))
-        del self.joiningChannelUserMap[channel]
-      if channel in self.channelKeyMap:
-        del self.channelKeyMap[channel]
     return False
 
   def userJoined(self, client, user, channel):
@@ -169,14 +129,4 @@ class Mentor:
     client.say(self.reportChannel,
       "%(nick)s asks in %(channel)s: %(question)s" %
       {"nick": nick, "channel": channel, "question": question})
-    return True
-
-  def join(self, client, user, message):
-    params = message.split(' ')
-    if len(params) != 3:
-      return False
-    channel = params[1]
-    channelKey = params[2]
-    self.channelKeyMap[channel] = channelKey
-    client.msg(user, "Now invite me by saying '/invite %s %s'" % (client.nickname, channel,))
     return True

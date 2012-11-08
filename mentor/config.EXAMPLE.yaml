@@ -12,6 +12,7 @@ irc:
   operator: Blort # nick of person who can issue restricted commands
 modules:
   - { module: debug, class: DebugHandler, args: }
+  - { module: join, class: Join, args: }
   - module: mentor
     class: Mentor
     args:
