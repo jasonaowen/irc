@@ -11,7 +11,9 @@ irc:
     - { name: '#example-test', key: 'password', ChanservInite: Yes }
   operator: Blort # nick of person who can issue restricted commands
 modules:
-  - { module: debug, class: DebugHandler, args: }
+  - module: debug
+    class: DebugHandler
+    args: { ignore: [ "PONG" ] }
   - module: storybot
     class: Storybot
     args:

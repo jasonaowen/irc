@@ -20,7 +20,10 @@ import datetime
 
 class DebugHandler:
   def __init__(self, args):
-    pass
+    if args is not None and "ignore" in args:
+      self.ignore = set(args["ignore"])
+    else:
+      self.ignore = set()
   def action(self, client, channel, name, message):
     print "%s: %s/%s did %s" % (self.now(), channel, name, message,)
     return False
@@ -42,7 +45,8 @@ class DebugHandler:
     print "%s: Private message from %s: %s" % (self.now(), name, message,)
     return False
   def unknownCommand(self, client, prefix, command, params):
-    print "%s: %s %s %s" % (self.now(), prefix, command, params,)
+    if command not in self.ignore:
+      print "%s: %s %s %s" % (self.now(), prefix, command, params,)
     return False
   def userJoined(self, client, user, channel):
     print "%s: %s joins %s" % (self.now(), user, channel,)
