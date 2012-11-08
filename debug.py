@@ -25,40 +25,43 @@ class DebugHandler:
     else:
       self.ignore = set()
   def action(self, client, channel, name, message):
-    print "%s: %s/%s did %s" % (self.now(), channel, name, message,)
+    self.log(client, "%s/%s did %s" % (channel, name, message,))
     return False
   def channelMessage(self, client, channel, name, message):
-    print "%s: %s/%s: %s" % (self.now(), channel, name, message,)
+    self.log(client, "%s/%s: %s" % (channel, name, message,))
     return False
   def joined(self, client, channel):
-    print "%s: Joined %s." % (self.now(), channel,)
+    self.log(client, "Joined %s." % (channel,))
     return False
   def kickedFrom(self, client, channel, kicker, message):
-    print "%s: Kicked from %s by %s because %s." % (self.now(), channel, kicker, message,)
+    self.log(client, "Kicked from %s by %s because %s." % (channel, kicker, message,))
     return False
   def nickChanged(self, client, nick):
-    print "%s: Nickname changed to %s" % (self.now(), nick,)
+    self.log(client, "Nickname changed to %s" % (nick,))
+    return False
   def notice(self, client, channel, user, message):
-    print "%s: Notice on channel %s by user %s: %s" % (self.now(), channel, user, message,)
+    self.log(client, "Notice on channel %s by user %s: %s" % (channel, user, message,))
     return False
   def privateMessage(self, client, name, message):
-    print "%s: Private message from %s: %s" % (self.now(), name, message,)
+    self.log(client, "Private message from %s: %s" % (name, message,))
     return False
   def unknownCommand(self, client, prefix, command, params):
     if command not in self.ignore:
-      print "%s: %s %s %s" % (self.now(), prefix, command, params,)
+      self.log(client, "%s %s %s" % (prefix, command, params,))
     return False
   def userJoined(self, client, user, channel):
-    print "%s: %s joins %s" % (self.now(), user, channel,)
+    self.log(client, "%s joins %s" % (user, channel,))
     return False
   def userLeft(self, client, user, channel):
-    print "%s: %s leaves %s" % (self.now(), user, channel,)
+    self.log(client, "%s leaves %s" % (user, channel,))
     return False
   def userQuit(self, client, user, quitMessage):
-    print "%s: %s quits: %s" % (self.now(), user, quitMessage,)
+    self.log(client, "%s quits: %s" % (user, quitMessage,))
     return False
   def userRenamed(self, client, oldname, newname):
-    print "%s: %s is now %s" % (self.now(), oldname, newname,)
+    self.log(client, "%s is now %s" % (oldname, newname,))
     return False
+  def log(self, client, message):
+    print "%s %s: %s" % (client.nickname, self.now(), message,)
   def now(self):
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
