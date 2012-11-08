@@ -36,6 +36,9 @@ class DebugHandler:
   def kickedFrom(self, client, channel, kicker, message):
     self.log(client, "Kicked from %s by %s because %s." % (channel, kicker, message,))
     return False
+  def modeChanged(self, client, user, channel, set, modes, args):
+    # Mode change: user: ChanServ!chanserv@services.irc.cat.pdx.edu, channel: #storytime-test, set: True, modes: o, args: ('Starybot',)
+    self.log(client, "%s/%s set [%s%s %s]" % (channel, user, self.strFor(set), modes, args,))
   def nickChanged(self, client, nick):
     self.log(client, "Nickname changed to %s" % (nick,))
     return False
@@ -65,3 +68,8 @@ class DebugHandler:
     print "%s %s: %s" % (client.nickname, self.now(), message,)
   def now(self):
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+  def strFor(self, set):
+    if set:
+      return "+"
+    else:
+      return "-"
