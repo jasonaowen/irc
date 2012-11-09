@@ -24,6 +24,16 @@ class Mentor:
     self.channelUserMap = {}
     self.reportChannel = args["reportChannel"]
 
+  def channelMessage(self, client, channel, name, message):
+    if channel == self.reportChannel and message.lower() == "%s: channels" % (client.nickname.lower(),):
+      response = "I am in the following channels:"
+      for c in self.channelUserMap.keys():
+        response = response + " " + c
+      client.say(self.reportChannel, response)
+      return True
+    else:
+      return False
+
   def privateMessage(self, client, name, message):
     (nick,remain) = name.split('!')
     (user,host) = remain.split('@')
