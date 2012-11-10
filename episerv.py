@@ -26,6 +26,7 @@ class EpiServ:
     self.target = args["target"]
     self.messages = args["messages"]
     self.lastKicker = None
+
   def joined(self, client, channel):
     if channel == self.arena and self.lastKicker is not None:
       if self.lastKicker == self.target:
@@ -37,6 +38,7 @@ class EpiServ:
       return True
     else:
       return False
+
   def kickedFrom(self, client, channel, kicker, message):
     self.lastKicker = kicker
     if kicker == self.target:
@@ -48,6 +50,12 @@ class EpiServ:
     if channel == self.arena:
       client.join(self.arena, self.arenaKey)
     return True
+
+  def nickChanged(self, client, nick):
+    if nick == self.target:
+      self.sendMessageToChannel(client, self.arena, "win")
+      self.sendMessageToUser(client, client.factory.operator, "win")
+
   def userQuit(self, client, user, quitMessage):
     if user.split("!")[0] == self.target:
       client.setNick(self.target)
