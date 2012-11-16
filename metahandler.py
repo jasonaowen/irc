@@ -70,6 +70,9 @@ class MetaMetaHandler:
     elif message.lower().find("insmod") == 0:
       self.insertModule(client, nick, message)
       return True
+    elif message.lower().find("rmmod") == 0:
+      self.removeModule(client, nick, message)
+      return True
     else:
       return False
 
@@ -79,7 +82,7 @@ class MetaMetaHandler:
     else:
       (command, index, moduleName, className, args) = message.split(' ', 4)
       try:
-        i = eval(index)
+        i = int(index)
         m = __import__(moduleName)
         c = getattr(m, className,)
         a = eval(args)
@@ -123,3 +126,15 @@ class MetaMetaHandler:
           client.msg(nick, "Module %s reloaded." % (moduleName,))
         except Exception as e:
           client.msg(nick, "%s exception: %s" % (type(e).__name__, e,))
+
+  def removeModule(self, client, nick, message):
+    if len(message.split(' ')) != 2:
+      client.msg(nick, "Syntax: rmmod index")
+    else:
+      index = message.split(' ')[1]
+      try:
+        i = int(index)
+        oldModule = self.metaHandler.messageHandlers.pop(i)
+        client.msg(nick, "Module %s removed." % (oldModule[1],))
+      except Exception as e:
+        client.msg(nick, "%s exception: %s" % (type(e).__name__, e,))
