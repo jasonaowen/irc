@@ -91,11 +91,14 @@ class MetaMetaHandler:
       if moduleName not in [x[1] for x in self.metaHandler.messageHandlers]:
         client.msg(nick, "No such module %s" % (moduleName,))
       else:
-        oldModule = [x for x in self.metaHandler.messageHandlers if x[1] == moduleName][0]
-        index = self.metaHandler.messageHandlers.index(oldModule)
-        self.metaHandler.messageHandlers.remove(oldModule)
-        m = reload(oldModule[0])
-        c = getattr(m, oldModule[1])
-        newModule = (m, oldModule[1], c(oldModule[3]), oldModule[3])
-        self.metaHandler.messageHandlers.insert(index, newModule)
-        client.msg(nick, "Module %s reloaded." % (moduleName,))
+        try:
+          oldModule = [x for x in self.metaHandler.messageHandlers if x[1] == moduleName][0]
+          m = reload(oldModule[0])
+          c = getattr(m, oldModule[1])
+          newModule = (m, oldModule[1], c(oldModule[3]), oldModule[3])
+          index = self.metaHandler.messageHandlers.index(oldModule)
+          self.metaHandler.messageHandlers.remove(oldModule)
+          self.metaHandler.messageHandlers.insert(index, newModule)
+          client.msg(nick, "Module %s reloaded." % (moduleName,))
+        except Exception as e:
+          client.msg(nick, "%s exception: %s" % (type(e).__name__, e,))
