@@ -23,7 +23,7 @@ class MetaHandler:
   def __init__(self, modules):
     self.messageHandlers = [] # (module, class name, instance of class, initial args)
     self.messageHandlers.append(
-      (sys.modules[__name__], 'MetaMetaHandler', MetaMetaHandler(self)))
+      (sys.modules[__name__], 'MetaMetaHandler', MetaMetaHandler(self), self))
     for module in modules:
       m = __import__(module["module"])
       c = getattr(m, module["class"])
@@ -39,7 +39,7 @@ class MetaHandler:
       else:
         print "  Passing argument '%s'." % (module["args"],)
       self.messageHandlers.append(
-        (m, module['class'], c(module["args"])))
+        (m, module['class'], c(module["args"]), module["args"]))
 
   def handleEvent(self, methodName, *args):
     handled = False
@@ -55,5 +55,27 @@ class MetaMetaHandler:
 
   def privateMessage(self, client, name, message):
     nick = name.split('!')[0]
-    if client.factory.operator == nick and message.lower() == "lsmod":
-      client.msg(nick, ", ".join([x[1] for x in self.metaHandler.messageHandlers]))
+    if client.factory.operator != nick:
+      return False
+
+    if message.lower() == "lsmod":
+      self.listModules(client, nick)
+      return True
+    elif message.lower().find("args") == 0:
+      self.showArgs(client, nick, message)
+      return True
+    else
+      return False
+
+  def listModules(self, client, nick):
+    client.msg(nick, ", ".join([x[1] for x in self.metaHandler.messageHandlers]))
+
+  def showArgs(self, client, nick, message):
+    if len(message.split(' ')) != 2:
+      client.msg(nick, "Syntax: args ModuleName")
+    else:
+      moduleName = message.split(' ')[1]
+      if moduleName not in [x[1] for x in self.metaHandler.messageHandlers]:
+        client.msg(nick, "No such module %s" % (moduleName,))
+      else:
+        client.msg(nick, "%s" % ([x[3] for x in self.metaHandler.messageHandlers if x[1] == moduleName][0]),)
