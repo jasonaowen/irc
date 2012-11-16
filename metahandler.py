@@ -16,11 +16,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import yaml
 
 class MetaHandler:
   def __init__(self, modules):
-    self.messageHandlers = []
+    self.messageHandlers = [] # (module, class name, instance of class, initial args)
+    self.messageHandlers.append(
+      (sys.modules[__name__], 'MetaMetaHandler', MetaMetaHandler(self)))
     for module in modules:
       m = __import__(module["module"])
       c = getattr(m, module["class"])
@@ -36,12 +39,21 @@ class MetaHandler:
       else:
         print "  Passing argument '%s'." % (module["args"],)
       self.messageHandlers.append(
-        {'module': m, 'classname': module['class'], 'object': c(module["args"])})
+        (m, module['class'], c(module["args"])))
 
   def handleEvent(self, methodName, *args):
     handled = False
-    for handler in self.messageHandlers:
-      if not handled and methodName in dir(handler['object']):
-        method = getattr(handler['object'], methodName, False)
+    for handler in [x[2] for x in self.messageHandlers]:
+      if not handled and methodName in dir(handler):
+        method = getattr(handler, methodName, False)
         if callable(method):
           handled = method(*args)
+
+class MetaMetaHandler:
+  def __init__(self, metaHandler):
+    self.metaHandler = metaHandler
+
+  def privateMessage(self, client, name, message):
+    nick = name.split('!')[0]
+    if client.factory.operator == nick and message.lower() == "lsmod":
+      client.msg(nick, ", ".join([x[1] for x in self.metaHandler.messageHandlers]))
