@@ -39,7 +39,7 @@ class MetaHandler:
       else:
         print "  Passing argument '%s'." % (module["args"],)
       self.messageHandlers.append(
-        (m, module['class'], c(module["args"]), module["args"]))
+        (m, module['class'], c(module["args"]), module["args"],))
 
   def handleEvent(self, methodName, *args):
     handled = False
@@ -67,8 +67,29 @@ class MetaMetaHandler:
     elif message.lower().find("reload") == 0:
       self.reloadModule(client, nick, message)
       return True
+    elif message.lower().find("insmod") == 0:
+      self.insertModule(client, nick, message)
+      return True
     else:
       return False
+
+  def insertModule(self, client, nick, message):
+    if len(message.split(' ')) < 5:
+      client.msg(nick, "Syntax: insmod index ModuleName ClassName args")
+    else:
+      (command, index, moduleName, className, args) = message.split(' ', 4)
+      try:
+        i = eval(index)
+        m = __import__(moduleName)
+        c = getattr(m, className,)
+        a = eval(args)
+        print "Adding class '%s' from module '%s' as message handler." % \
+          (moduleName, className,)
+        print "  Passing argument '%s'." % (a,)
+        self.metaHandler.messageHandlers.insert(i, (m, className, c(a), a,))
+        client.msg(nick, "%s loaded." % (className,))
+      except Exception as e:
+        client.msg(nick, "%s exception: %s" % (type(e).__name__, e,))
 
   def listModules(self, client, nick):
     client.msg(nick, ", ".join([x[1] for x in self.metaHandler.messageHandlers]))
