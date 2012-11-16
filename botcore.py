@@ -22,6 +22,7 @@ from twisted.internet import protocol, reactor, ssl
 from twisted.words.protocols import irc
 import sys
 import yaml
+import metahandler
 
 class BotCore(irc.IRCClient):
   def _get_username(self):
@@ -43,52 +44,44 @@ class BotCore(irc.IRCClient):
       self.join(channel["name"], channel["key"])
 
   def action(self, user, channel, data):
-    self.handleEvent("action", self, channel, user, data)
+    self.factory.messageHandler.handleEvent("action", self, channel, user, data)
 
   def irc_unknown(self, prefix, command, params):
-    self.handleEvent("unknownCommand", self, prefix, command, params)
+    self.factory.messageHandler.handleEvent("unknownCommand", self, prefix, command, params)
 
   def joined(self, channel):
-    self.handleEvent("joined", self, channel)
+    self.factory.messageHandler.handleEvent("joined", self, channel)
 
   def kickedFrom(self, channel, kicker, message):
-    self.handleEvent("kickedFrom", self, channel, kicker, message)
+    self.factory.messageHandler.handleEvent("kickedFrom", self, channel, kicker, message)
 
   def modeChanged(self, user, channel, set, modes, args):
-    self.handleEvent("modeChanged", self, user, channel, set, modes, args)
+    self.factory.messageHandler.handleEvent("modeChanged", self, user, channel, set, modes, args)
 
   def nickChanged(self, nick):
-    self.handleEvent("nickChanged", self, nick)
+    self.factory.messageHandler.handleEvent("nickChanged", self, nick)
     self.nickname = nick
 
   def noticed(self, user, channel, message):
-    self.handleEvent("notice", self, channel, user, message)
+    self.factory.messageHandler.handleEvent("notice", self, channel, user, message)
 
   def privmsg(self, user, channel, msg):
     if channel == self.nickname:
-      self.handleEvent("privateMessage", self, user, msg)
+      self.factory.messageHandler.handleEvent("privateMessage", self, user, msg)
     else:
-      self.handleEvent("channelMessage", self, channel, user, msg)
+      self.factory.messageHandler.handleEvent("channelMessage", self, channel, user, msg)
 
   def userJoined(self, user, channel):
-    self.handleEvent("userJoined", self, user, channel)
+    self.factory.messageHandler.handleEvent("userJoined", self, user, channel)
 
   def userLeft(self, user, channel):
-    self.handleEvent("userLeft", self, user, channel)
+    self.factory.messageHandler.handleEvent("userLeft", self, user, channel)
 
   def userQuit(self, user, quitMessage):
-    self.handleEvent("userQuit", self, user, quitMessage)
+    self.factory.messageHandler.handleEvent("userQuit", self, user, quitMessage)
 
   def userRenamed(self, oldname, newname):
-    self.handleEvent("userRenamed", self, oldname, newname)
-
-  def handleEvent(self, methodName, *args):
-    handled = False
-    for handler in self.factory.messageHandlers:
-      if not handled and methodName in dir(handler):
-        method = getattr(handler, methodName, False)
-        if callable(method):
-          handled = method(*args)
+    self.factory.messageHandler.handleEvent("userRenamed", self, oldname, newname)
 
 class BotCoreFactory(protocol.ClientFactory):
   protocol = BotCore
@@ -99,23 +92,7 @@ class BotCoreFactory(protocol.ClientFactory):
     self.operator = operator
     self.nickname = nickname
     self.channels = channels
-
-    self.messageHandlers = []
-    for module in modules:
-      m = __import__(module["module"])
-      c = getattr(m, module["class"])
-      print "Adding class '%s' from module '%s' as message handler." % \
-        (module["class"], module["module"],)
-      if hasattr(module["args"], "get") and module["args"].has_key("yaml"):
-        yamlFileName = module["args"].pop("yaml")
-        print "  Loading yaml file '%s'." % (yamlFileName,)
-        print "  Passing argument '%s'." % (module["args"],)
-        yamlFile = open(yamlFileName)
-        module["args"]["yaml"] = yaml.load(yamlFile)
-        yamlFile.close()
-      else:
-        print "  Passing argument '%s'." % (module["args"],)
-      self.messageHandlers.append(c(module["args"]))
+    self.messageHandler = metahandler.MetaHandler(modules)
 
   def clientConnectionLost(self, connector, reason):
     print "Lost connection (%s), reconnecting." % (reason,)
