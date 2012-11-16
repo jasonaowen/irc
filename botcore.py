@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from twisted.internet import protocol, reactor, ssl
+from twisted.internet import protocol, reactor, ssl, error
 from twisted.words.protocols import irc
 import sys
 import yaml
@@ -95,8 +95,12 @@ class BotCoreFactory(protocol.ClientFactory):
     self.messageHandler = metahandler.MetaHandler(modules)
 
   def clientConnectionLost(self, connector, reason):
-    print "Lost connection (%s), reconnecting." % (reason,)
-    connector.connect()
+    if reason.type == error.ConnectionDone:
+      print "Connection closed cleanly."
+      connector.reactor.stop()
+    else:
+      print "Lost connection (%s), reconnecting." % (reason,)
+      connector.connect()
 
   def clientConnectionFailed(self, connector, reason):
     print "Could not connect: %s" % (reason,)
