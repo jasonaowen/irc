@@ -64,7 +64,10 @@ class MetaMetaHandler:
     elif message.lower().find("args") == 0:
       self.showArgs(client, nick, message)
       return True
-    else
+    elif message.lower().find("reload") == 0:
+      self.reloadModule(client, nick, message)
+      return True
+    else:
       return False
 
   def listModules(self, client, nick):
@@ -79,3 +82,20 @@ class MetaMetaHandler:
         client.msg(nick, "No such module %s" % (moduleName,))
       else:
         client.msg(nick, "%s" % ([x[3] for x in self.metaHandler.messageHandlers if x[1] == moduleName][0]),)
+
+  def reloadModule(self, client, nick, message):
+    if len(message.split(' ')) != 2:
+      client.msg(nick, "Syntax: reload ModuleName")
+    else:
+      moduleName = message.split(' ')[1]
+      if moduleName not in [x[1] for x in self.metaHandler.messageHandlers]:
+        client.msg(nick, "No such module %s" % (moduleName,))
+      else:
+        oldModule = [x for x in self.metaHandler.messageHandlers if x[1] == moduleName][0]
+        index = self.metaHandler.messageHandlers.index(oldModule)
+        self.metaHandler.messageHandlers.remove(oldModule)
+        m = reload(oldModule[0])
+        c = getattr(m, oldModule[1])
+        newModule = (m, oldModule[1], c(oldModule[3]), oldModule[3])
+        self.metaHandler.messageHandlers.insert(index, newModule)
+        client.msg(nick, "Module %s reloaded." % (moduleName,))
