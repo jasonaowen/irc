@@ -105,6 +105,17 @@ class Storybot:
         client.mode(params[1], True, "v", None, self.nextUser)
     return False
 
+  def action(self, client, channel, user, data):
+    nick = user.split("!")[0]
+    if self.state == "active":
+      nextUser = self.chooseNextUser(nick)
+      client.mode(channel, False, "v", None, self.nextUser)
+      self.nextUser = nextUser
+      self.readyUsers.add(nick)
+      self.readyUsers.remove(self.nextUser)
+      client.mode(channel, True, "v", None, self.nextUser)
+      client.msg(self.nextUser, "It's your turn in %s!" % channel)
+
   def addUser(self, client, user):
     nick = user.split("!")[0]
     if nick in self.readyUsers:
