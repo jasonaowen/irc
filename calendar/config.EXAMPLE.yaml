@@ -1,0 +1,29 @@
+irc:
+  server:
+    address: irc.example.com
+    port: 7000
+    ssl: Yes
+    username: foo
+    password: bar
+  nickname: Examplebot
+  channels:
+    - { name: '#example', key: }
+    - { name: '#example-test', key: 'password', ChanservInvite: Yes }
+  operator: Blort # nick of person who can issue restricted commands
+modules:
+  - { module: debug, class: DebugHandler, args: }
+  - { module: join, class: Join, args: }
+  - module: calendar
+    class: Calendar
+    args:
+      developerKey: 'YOUR_API_KEY_HERE'
+      timezone: 'UTC'
+      calendars:
+        - name: 'Holidays'
+          calendarId: 'en.usa#holiday@group.v.calendar.google.com'
+        - name: 'moon'
+          calendarId: 'ht3jlfaac5lfd6263ulfh4tql8@group.calendar.google.com'
+      channels:
+        - { name: '#example', calendars: ['Holidays'] }
+        - { name: '#example-test', calendars: ['Holidays', 'moon'] }
+  - { module: help,  class: HelpHandler,  args: { yaml: 'calendar/help.yaml' } }
